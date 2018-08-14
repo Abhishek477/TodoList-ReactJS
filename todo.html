@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-
+<!--https://www.youtube.com/watch?v=QY7Ibl37_08&index=10&list=PLillGF-RfqbbKWfm3Y_RF57dNGsHnkYqO-->
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,6 +11,8 @@
     <script src="https://fb.me/react-0.14.3.min.js"></script>
     <script src="https://fb.me/react-dom-0.14.3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.25/browser.min.js"></script>
+    <script src="https://cdn.firebase.com/js/client/1.0.21/firebase.js"></script>
+    
     <style>
         body{margin-top: 30px}
         a.delete{color: red}
@@ -33,21 +35,24 @@
                     return {
                         text: '',
                         isEdit: 0,
-                        todos: [
-                            {
-                                id: 1,
-                                text: 'Todo No 1'
-                            },
-                            {
-                                id: 2,
-                                text: 'Todo No 2'
-                            },
-                            {
-                                id: 3,
-                                text: 'Todo No 3'
-                            }
-                        ]
+                        todos: []
                     }
+                },
+
+                componentWillMount: function(){
+                    this.firebaseRef = new Firebase('https://todolist-on-react.firebaseio.com/todos');
+                    var that = this;
+                    this.firebaseRef.once("value", function(snapshot){
+                        var todos = [];
+                        snapshot.forEach(function(data){
+                            var todo = {
+                                id: data.val().id,
+                                text: data.val().text
+                            }
+                            todos.push(todo);
+                            that.setState({todos: todos});
+                        });
+                    });
                 },
 
                 render: function() {
@@ -71,6 +76,8 @@
                         id: this.state.todos.length + 1,
                         text: text
                     }
+                    this.firebaseRef.push(newTodo);
+
                     this.setState({todos: this.state.todos.concat(newTodo)});
                 },
 
