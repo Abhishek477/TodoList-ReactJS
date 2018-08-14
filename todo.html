@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Learning ReactJS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    />
+    <script src="https://fb.me/react-0.14.3.min.js"></script>
+    <script src="https://fb.me/react-dom-0.14.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.25/browser.min.js"></script>
+    <style>
+        body{margin-top: 30px}
+        a.delete{color: red}
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="app"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/babel">
+            var App = React.createClass({
+
+                getInitialState: function(){
+                    return {
+                        text: '',
+                        isEdit: 0,
+                        todos: [
+                            {
+                                id: 1,
+                                text: 'Todo No 1'
+                            },
+                            {
+                                id: 2,
+                                text: 'Todo No 2'
+                            },
+                            {
+                                id: 3,
+                                text: 'Todo No 3'
+                            }
+                        ]
+                    }
+                },
+
+                render: function() {
+                    return(
+                        <div>
+                            <TodoForm 
+                                {...this.state}
+                                changeText={this.handleChangeText}
+                                onTodoUpdate={this.handleTodoUpdate}
+                                onTodoAdd={this.handleTodoAdd}/>
+                            <TodoList 
+                                {...this.state}
+                                editTodo={this.handleTodoEdit} 
+                                deleteTodo={this.handleTodoDelete}/>
+                        </div>
+                    )
+                },
+
+                handleTodoAdd: function(text){
+                    var newTodo = {
+                        id: this.state.todos.length + 1,
+                        text: text
+                    }
+                    this.setState({todos: this.state.todos.concat(newTodo)});
+                },
+
+                handleTodoDelete: function(todo){
+                    var todos = this.state.todos;
+                    for(var i = 0; i < todos.length; i++){
+                        if(todos[i].id == todo.id){
+                            todos.splice(i, 1);
+                        }
+                    }
+                    this.setState({todos: todos});
+                },
+
+                handleTodoEdit: function(todo){
+                    this.setState({
+                        text: todo.text,
+                        isEdit: todo.id
+                    });
+                },
+
+                handleChangeText: function(text){
+                    this.setState({text: text});
+                },
+
+                handleTodoUpdate: function(todo){
+                    var todos = this.state.todos;
+                    for(var i = 0; i < todos.length; i++){
+                        if(todos[i].id == todo.id){
+                            todos.splice(i, 1);
+                        }
+                    }
+                    todos.push(todo);
+                    this.setState({todos: todos});
+                }
+            });
+            
+            var TodoForm = React.createClass({
+                render: function() {
+                    return(
+                        <div>
+                            <form onSubmit={this.onSubmit}>
+                                <div className="form-group">
+                                    <label><b>Todo text</b></label>
+                                    <input type="text" ref="text" value={this.props.text} onChange={this.onChange} className="form-control"/>
+                                </div>
+                            </form>
+                        </div>
+                    )
+                },
+
+                onChange: function(e){
+                    this.props.changeText(e.target.value);
+                },
+                
+                onSubmit: function(e){
+                    e.preventDefault();
+                    var text = this.refs.text.value.trim();
+                    if(!text)   {alert('Please enter a TODO');return;}
+                    if(this.props.isEdit){
+                        var updatedTodo = {
+                            id: this.props.isEdit,
+                            text: text
+                        }
+                        this.props.onTodoUpdate(updatedTodo);
+                    }else{
+                        this.props.onTodoAdd(text);
+                    }
+                    this.refs.text.value = '';
+                },
+
+            });
+
+            var TodoList = React.createClass({
+                render: function() {
+                    return(
+                        <ul className="list-group">
+                            {
+                                this.props.todos.map(todo => {
+                                    return <li todo={todo} key={todo.id}>
+                                            <span onClick={this.editTodo.bind(this, todo)}>{todo.text}</span>
+                                            <a onClick={this.onDelete.bind(this, todo)} className="delete" href="#">x</a></li>
+                                })
+                            }
+                        </ul>
+                    )
+                },
+                onDelete: function(todo){
+                    this.props.deleteTodo(todo);
+                },
+                editTodo: function(todo){
+                    this.props.editTodo(todo);
+                }
+
+            });
+
+            ReactDOM.render(
+                    <App />,
+                    document.getElementById('app')
+            );
+
+        </script>
+</body>
+
+</html>
